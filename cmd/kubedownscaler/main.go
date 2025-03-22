@@ -74,11 +74,11 @@ func main() {
 	defer cancel()
 
 	if !config.LeaderElection {
-		runWithoutLeaderElection(client, ctx, layerDefault, &layerCli, &layerEnv, config)
+		runWithoutLeaderElection(client, ctx, layerDefault, layerCli, layerEnv, config)
 		return
 	}
 
-	runWithLeaderElection(client, cancel, ctx, layerDefault, &layerCli, &layerEnv, config)
+	runWithLeaderElection(client, cancel, ctx, layerDefault, layerCli, layerEnv, config)
 }
 
 func runWithLeaderElection(
@@ -262,7 +262,7 @@ func scanWorkload(
 		return fmt.Errorf("%w: %s", errNamespaceLayersRetrieveFailed, workload.GetNamespace())
 	}
 
-	layers := values.Layers{&layerWorkload, layerNamespace, layerCli, layerEnv, layerDefault}
+	layers := values.Layers{layerWorkload, layerNamespace, layerCli, layerEnv, layerDefault}
 
 	slog.Debug("finished parsing all layers", "layers", layers, "workload", workload.GetName(), "namespace", workload.GetNamespace())
 

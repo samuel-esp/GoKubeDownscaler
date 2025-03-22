@@ -92,7 +92,7 @@ func TestScanWorkload(t *testing.T) {
 	})
 	mockClient.On("DownscaleWorkload", int32(0), mockWorkload, ctx).Return(nil)
 
-	err := scanWorkload(mockWorkload, mockClient, ctx, values.GetDefaultLayer(), &layerCli, &layerEnv, namespaceLayers, config)
+	err := scanWorkload(mockWorkload, mockClient, ctx, values.GetDefaultLayer(), layerCli, layerEnv, namespaceLayers, config)
 
 	require.NoError(t, err)
 

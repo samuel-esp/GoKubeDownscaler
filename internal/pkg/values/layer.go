@@ -52,15 +52,7 @@ func (l LayerID) String() string {
 }
 
 // NewLayer gets a new layer with the default values.
-func NewLayer() Layer {
-	return Layer{
-		DownscaleReplicas: util.Undefined,
-		GracePeriod:       util.Undefined,
-	}
-}
-
-// NewLayerPtr gets a new layer with the default values and returns a pointer to it.
-func NewLayerPtr() *Layer {
+func NewLayer() *Layer {
 	return &Layer{
 		DownscaleReplicas: util.Undefined,
 		GracePeriod:       util.Undefined,
