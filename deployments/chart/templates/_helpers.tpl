@@ -313,6 +313,26 @@ Create defined permissions for roles
     - list
     - update
 {{- end }}
+{{- if eq $resource "ingresses"}}
+- apiGroups:
+    - networking.k8s.io
+  resources:
+    - ingresses
+  verbs:
+    - get
+    - list
+    - update
+{{- end }}
+{{- if eq $resource "gateways"}}
+- apiGroups:
+    - gateway.networking.k8s.io
+  resources:
+    - gateways
+  verbs:
+    - get
+    - list
+    - update
+{{- end }}
 {{- if eq $resource "postgresqls" }}
 - apiGroups:
     - acid.zalan.do
@@ -479,6 +499,32 @@ Create webhook resources
     - ""
   resources:
     - services
+  operations:
+    - "CREATE"
+    - "UPDATE"
+  verbs:
+    - get
+    - list
+    - update
+{{- end }}
+{{- if eq $resource "ingresses" }}
+- apiGroups:
+    - "networking.k8s.io"
+  resources:
+    - ingresses
+  operations:
+    - "CREATE"
+    - "UPDATE"
+  verbs:
+    - get
+    - list
+    - update
+{{- end }}
+{{- if eq $resource "gateways" }}
+- apiGroups:
+    - "gateway.networking.k8s.io"
+  resources:
+    - gateways
   operations:
     - "CREATE"
     - "UPDATE"
@@ -673,6 +719,32 @@ resources include in annotationsCompliance
     - "*"
   resources:
     - services
+  operations:
+  {{- if $createUpdate }}
+    - "CREATE"
+  {{- end }}
+    - "UPDATE"
+{{- end }}
+{{- if eq $resource "ingresses" }}
+- apiGroups:
+    - "networking.k8s.io"
+  apiVersions:
+    - "*"
+  resources:
+    - ingresses
+  operations:
+  {{- if $createUpdate }}
+    - "CREATE"
+  {{- end }}
+    - "UPDATE"
+{{- end }}
+{{- if eq $resource "gateways" }}
+- apiGroups:
+    - "gateway.networking.k8s.io"
+  apiVersions:
+    - "*"
+  resources:
+    - gateways
   operations:
   {{- if $createUpdate }}
     - "CREATE"
