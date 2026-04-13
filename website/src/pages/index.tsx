@@ -1,8 +1,9 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
 import { SupportedResources } from "@site/src/components/Homepage/SupportedResources";
+import ProjectDescription from "@site/src/components/Homepage/ProjectDescription";
+import KubeDownscalerFeatures from "@site/src/components/Homepage/KubeDownscalerFeatures";
 import { Button } from "../components/Basic/Button";
-import * as KubedownscalerNameSVG from "@site/static/img/kubedownscaler-name-light.svg";
 import * as KubedownscalerSVG from "@site/static/img/kubedownscaler.svg";
 import Heading from "@theme/Heading";
 import Head from "@docusaurus/Head";
@@ -10,37 +11,26 @@ import Head from "@docusaurus/Head";
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
   return (
-    <div className="relative overflow-x-hidden overflow-y-visible h-fit pb-35 xl:pb-0">
+    <div className="relative overflow-x-hidden overflow-y-visible">
       <div className="transform bg-magenta -skew-y-6 xl:hidden h-full w-full absolute top-0 origin-top-left" />
-      <header className="select-none text-white bg-magenta items-center flex py-16 px-8 overflow-hidden relative text-center h-fit">
-        <div className="px-4 w-full flex flex-col items-center justify-center">
-          <KubedownscalerNameSVG.default className="animate-fade-down h-10 hidden xl:block" />
-          <div className="animate-fade-down xl:hidden flex flex-col justify-center">
-            <KubedownscalerSVG.default className="h-30" />
-            <Heading as="h1" className="text-[clamp(1.25rem,8vw,3rem)]">
-              {siteConfig.title}
-            </Heading>
-          </div>
-            <div>
-                {/* small screen headline */}
-                <p className="animate-fade-down text-xl sm:hidden mb-6">
-                    Saving Cloud Costs By Scaling Workloads Down After Hours
-                </p>
-                {/* medium and larger screens headline */}
-                <p className="animate-fade-down text-xl sm:text-2xl md:text-3xl lg:text-4xl hidden sm:block mb-2 mt-6">
-                    {siteConfig.tagline}
-                </p>
-                {/* subheading (shown only on medium and larger screens) */}
-                <p className="animate-fade-down text-md sm:text-xl md:text-2xl lg:text-2xl hidden sm:block mb-6 mt-4">
-                    Saving Cloud Costs By Scaling Workloads Down After Hours
-                </p>
-            </div>
-          <div className="flex justify-center space-x-0 sm:space-x-3 sm:flex-row space-y-3 sm:space-y-0 flex-col">
-            <Button
-              name="Get Started"
-              to="/guides/getting-started"
-              className="w-52"
-            />
+      <header className="select-none text-white bg-magenta items-center flex pt-10 pb-24 px-8 overflow-hidden relative text-center">
+        <div className="px-4 w-full flex flex-col items-center justify-center gap-6">
+          {/* Logo */}
+          <KubedownscalerSVG.default className="animate-fade-down h-28 sm:h-36 md:h-44" />
+          {/* Name */}
+          <Heading
+            as="h1"
+            className="animate-fade-down text-[clamp(1.75rem,6vw,3.5rem)] font-bold m-0"
+          >
+            {siteConfig.title}
+          </Heading>
+          {/* Subtitle */}
+          <p className="animate-fade-down text-lg sm:text-xl md:text-2xl lg:text-3xl max-w-4xl m-0">
+            Saving Cloud Costs By Scaling Workloads Down After Hours
+          </p>
+          {/* CTA buttons */}
+          <div className="animate-fade-down flex justify-center gap-3 flex-col sm:flex-row">
+            <Button name="Get Started" to="/guides/getting-started" className="w-52" />
             <Button name="Documentation" to="/docs" className="w-52" />
           </div>
         </div>
@@ -60,6 +50,8 @@ export default function Home(): JSX.Element {
       </Head>
       <HomepageHeader />
       <main>
+        <ProjectDescription />
+        <KubeDownscalerFeatures />
         <SupportedResources />
       </main>
     </Layout>
