@@ -104,7 +104,6 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      hideOnScroll: true,
       logo: {
         alt: "Kubedownscaler Logo",
         src: "img/kubedownscaler-name-dark.svg",

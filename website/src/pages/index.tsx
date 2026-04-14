@@ -1,8 +1,10 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
-import { SupportedResources } from "@site/src/components/Homepage/SupportedResources";
+import { SupportedResources } from "@site/src/components/Homepage/SupportedResources/SupportedResources.tsx";
 import ProjectDescription from "@site/src/components/Homepage/ProjectDescription";
 import KubeDownscalerFeatures from "@site/src/components/Homepage/KubeDownscalerFeatures";
+import HowItWorks from "@site/src/components/Homepage/HowItWorks";
+import FurtherCustomization from "@site/src/components/Homepage/FurtherCustomization";
 import { Button } from "../components/Basic/Button";
 import * as KubedownscalerSVG from "@site/static/img/kubedownscaler.svg";
 import Heading from "@theme/Heading";
@@ -21,12 +23,13 @@ function HomepageHeader() {
           <Heading
             as="h1"
             className="animate-fade-down text-[clamp(1.75rem,6vw,3.5rem)] font-bold m-0"
+            style={{ fontFamily: "'Poppins', sans-serif" }}
           >
             {siteConfig.title}
           </Heading>
           {/* Subtitle */}
           <p className="animate-fade-down text-lg sm:text-xl md:text-2xl lg:text-3xl max-w-4xl m-0">
-            Saving Cloud Costs By Scaling Workloads Down After Hours
+              Reduce Kubernetes Costs By Scaling Workloads Down After Hours
           </p>
           {/* CTA buttons */}
           <div className="animate-fade-down flex justify-center gap-3 flex-col sm:flex-row">
@@ -52,6 +55,8 @@ export default function Home(): JSX.Element {
       <main>
         <ProjectDescription />
         <KubeDownscalerFeatures />
+        <HowItWorks />
+        <FurtherCustomization />
         <SupportedResources />
       </main>
     </Layout>

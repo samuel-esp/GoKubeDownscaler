@@ -14,6 +14,7 @@ function ClockSvg(props: React.ComponentProps<"svg">) {
   );
 }
 
+/*
 function MoneySvg(props: React.ComponentProps<"svg">) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -33,7 +34,7 @@ function LayersSvg(props: React.ComponentProps<"svg">) {
       <polyline points="2 12 12 17 22 12" />
     </svg>
   );
-}
+}*/
 
 function SliderSvg(props: React.ComponentProps<"svg">) {
   return (
@@ -51,6 +52,7 @@ function SliderSvg(props: React.ComponentProps<"svg">) {
   );
 }
 
+/*
 function ShieldSvg(props: React.ComponentProps<"svg">) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
@@ -58,12 +60,12 @@ function ShieldSvg(props: React.ComponentProps<"svg">) {
     </svg>
   );
 }
+ */
 
-function PuzzleSvg(props: React.ComponentProps<"svg">) {
+function CloudSvg(props: React.ComponentProps<"svg">) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-      <line x1="7" y1="7" x2="7.01" y2="7" />
+      <path d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15z" />
     </svg>
   );
 }
@@ -78,112 +80,50 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: "Works Everywhere",
-        Svg: PuzzleSvg,
-    description: (
-      <>
-          Built for any Kubernetes distribution across AWS, GCP, Azure, and on-premises environments.
-          Fully supports all Kubernetes resources and popular CRDs like KEDA, Prometheus, and Argo.
-      </>
-  ),
-  },
-  {
-    title: "Enterprise Grade Scheduling",
-    Svg: SliderSvg,
-    description: (
-      <>
-          Control scheduling globally through CLI flags and environment variables, or via annotations
-          at namespace or workload level. Supports flexible scheduling for teams across timezones in multi-tenant clusters.
-      </>
-    ),
-  },
-  {
-      title: "Time Driven Scaling",
-          Svg: ClockSvg,
+      title: "Fine-Grained Scheduling",
+      Svg: SliderSvg,
       description: (
-      <>
-          Define scaling windows via RFC3339 timestamps, weekly schedules, or always/never rules.
-          Reduce costs with time as a native scaling dimension aligned to real infrastructure usage.
-      </>
-  ),
+          <>
+              Configure scheduling globally or via annotations at namespace or workload level.
+              Supports flexible scheduling for multi-tenant clusters and teams across timezones.
+          </>
+      ),
   },
-//{
-//    title: "Time Native Scaling",
-//        Svg: ClockSvg,
-//    description: (
-//    <>
-//        Define downscale and upscale windows using RFC3339 timestamps,
-//        recurring weekly schedules, or always and never rules.
-//        Apply them per workload, namespace, or globally.
-//    </>
-//),
-//},
+  {
+      title: "Flexible Time Formats",
+      Svg: ClockSvg,
+      description: (
+          <>
+              Define scaling windows as recurring schedules (like Mon–Fri), RFC3339 timespans,
+              or always/never rules. Treat time as a scaling dimension that best fits your
+              infrastructure usage
+          </>
+      ),
+  },
+  {
+      title: "Cloud Agnostic",
+      Svg: CloudSvg,
+      description: (
+          <>
+              Built for any Kubernetes distribution across AWS, GCP, Azure, and on-premises environments.
+              Fully supports all Kubernetes resources and popular CRDs like KEDA, Prometheus, and Argo.
+          </>
+      ),
+  }
 ];
-
-//{
-//    title: "Reduce Cloud Costs",
-//        Svg: MoneySvg,
-//    description: (
-//    <>
-//        Stop paying for idle replicas at night and on weekends. Scale workloads
-//        to zero during off-hours and bring them back automatically when needed.
-//    </>
-//),
-//},
-//{
-//    title: "Broad Resource Support",
-//        Svg: LayersSvg,
-//    description: (
-//    <>
-//        Works with Deployments, StatefulSets, DaemonSets, CronJobs, HPAs, PDBs,
-//        Argo Rollouts, KEDA ScaledObjects, Zalando Stacks and more.
-//    </>
-//),
-//},
-//{
-//    title: "Ecosystem Integration",
-//        Svg: PuzzleSvg,
-//    description: (
-//    <>
-//        Native support for Prometheus monitoring, KEDA event-driven scaling,
-//        Argo Rollouts, GitHub Actions runners, and Zalando Stacksets.
-//    </>
-//),
-//},
-//{
-//    title: "Time-based Scheduling",
-//        Svg: ClockSvg,
-//    description: (
-//    <>
-//        Define downscale and upscale windows using RFC3339 timestamps,
-//        recurring weekly schedules, or always and never rules.
-//        Apply them per workload, namespace, or globally.
-//    </>
-//),
-//},
-//{
-//    title: "Safe Operations",
-//        Svg: ShieldSvg,
-//    description: (
-//    <>
-//        Original state is preserved so workloads always return to the
-//        right state at the right time. Grace periods protect freshly deployed workloads from
-//        premature downscaling.
-//    </>
-//),
-//},
-
 /* ── Sub-components ── */
 
-function Feature({ title, Svg, description }: FeatureItem) {
-  return (
-    <div className={clsx("col col--4", styles.col)}>
-      <div className="text--center">
-        <div className={styles.iconWrap}>
-          <Svg className={styles.featureSvg} role="img" aria-label={title} />
-        </div>
-      </div>
-      <div className="text--center padding-horiz--md">
+function Feature({title, Svg, description, idx}: FeatureItem & { idx: number }) {
+    const delays = ["animate-delay-0", "animate-delay-200", "animate-delay-400"];
+    return (
+        <div
+            className={clsx("col col--4", styles.col, "animate-fade-down animate-once", delays[idx] ?? "animate-delay-0")}>
+            <div className="text--center">
+                <div className={styles.iconWrap}>
+                    <Svg className={styles.featureSvg} role="img" aria-label={title}/>
+                </div>
+            </div>
+            <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>
         <p>{description}</p>
       </div>
@@ -199,7 +139,7 @@ export default function KubeDownscalerFeatures(): ReactNode {
       <div className="container">
         <div className="row">
           {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
+            <Feature key={idx} idx={idx} {...props} />
           ))}
         </div>
       </div>
