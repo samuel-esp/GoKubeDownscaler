@@ -135,6 +135,26 @@
 .scheduleValue { color: #fab387; }
 .comment   { color: #6c7086; font-style: italic; }
 
+.cursor {
+  display: inline-block;
+  color: #fab387;
+  font-weight: 100;
+  animation: blink 1s step-start infinite;
+  margin-left: 1px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Hide the animated cursor entirely when JavaScript is disabled */
+@media (scripting: none) {
+  .cursor {
+    display: none;
+  }
+}
+
 /* ── Preview image ── */
 .previewImage {
   width: 100%;
