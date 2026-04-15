@@ -1,7 +1,7 @@
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme) important;
 @import "tailwindcss/utilities.css" layer(utilities) important;
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+/* Poppins font is loaded non-blocking via <link rel="preload"> in docusaurus.config.ts headTags */
 
 @plugin "tailwindcss-animated";
 

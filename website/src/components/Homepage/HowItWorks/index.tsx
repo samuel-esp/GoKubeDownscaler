@@ -1,10 +1,66 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Heading from "@theme/Heading";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import { useColorMode } from "@docusaurus/theme-common";
 import styles from "./styles.module.css";
 
+const TIMEZONES = [
+  "America/Los_Angeles",
+  "Asia/Tokyo",
+  "Australia/Brisbane",
+  "Europe/Bucharest",
+  "America/Santiago",
+  "Europe/Berlin",
+];
+
+const TYPING_SPEED_MS = 80;
+const DELETING_SPEED_MS = 40;
+const CYCLE_INTERVAL_MS = 10000;
+
+function useTypingCycle(items: string[]): string {
+  const [index, setIndex] = useState(0);
+  const [displayed, setDisplayed] = useState(items[0]);
+  const [phase, setPhase] = useState<"typing" | "waiting" | "deleting">("waiting");
+
+  useEffect(() => {
+    const current = items[index];
+
+    if (phase === "waiting") {
+      const t = setTimeout(() => setPhase("deleting"), CYCLE_INTERVAL_MS);
+      return () => clearTimeout(t);
+    }
+
+    if (phase === "deleting") {
+      if (displayed.length === 0) {
+        setIndex((i) => (i + 1) % items.length);
+        setPhase("typing");
+        return;
+      }
+      const t = setTimeout(
+        () => setDisplayed((d) => d.slice(0, -1)),
+        DELETING_SPEED_MS,
+      );
+      return () => clearTimeout(t);
+    }
+
+    if (phase === "typing") {
+      if (displayed.length === current.length) {
+        setPhase("waiting");
+        return;
+      }
+      const t = setTimeout(
+        () => setDisplayed(current.slice(0, displayed.length + 1)),
+        TYPING_SPEED_MS,
+      );
+      return () => clearTimeout(t);
+    }
+  }, [phase, displayed, index, items]);
+
+  return displayed;
+}
+
 function Terminal() {
+  const timezone = useTypingCycle(TIMEZONES);
   return (
     <div className={styles.terminal}>
       {/* Title bar */}
@@ -44,7 +100,10 @@ function Terminal() {
           {"  "}
           <span className={styles.annotation}>DEFAULT_UPTIME</span>
           <span className={styles.punct}>: </span>
-          <span className={styles.scheduleValue}>Mon-Fri 09:00-17:00 America/Los_Angeles</span>
+          <span className={styles.scheduleValue}>
+            Mon-Fri 09:00-17:00 {timezone}
+            <span className={styles.cursor}>|</span>
+          </span>
           {"\n"}
           {"  "}
           <span className={styles.annotation}>EXCLUDE_NAMESPACES</span>
@@ -87,8 +146,12 @@ export default function HowItWorks(): JSX.Element {
         <div className={`${styles.visualBlock} animate-fade-down animate-once animate-delay-500`}>
           <img
             src={previewSrc}
-            alt="GoKubeDownscaler in action"
+            alt="GoKubeDownscaler scheduling dashboard showing workloads being scaled down during off-hours"
             className={styles.previewImage}
+            width={1200}
+            height={675}
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
               (e.currentTarget.parentElement as HTMLElement).style.display = "none";
             }}
