@@ -71,6 +71,9 @@ const config: Config = {
           editUrl:
             "https://github.com/caas-team/GoKubeDownscaler/edit/main/website",
           showLastUpdateTime: true,
+          versions: {
+            current: { label: "Next 🚧" },
+          },
         },
         blog: {
           blogTitle: "GoKubeDownscaler Blog",
@@ -139,6 +142,10 @@ const config: Config = {
           to: "blog",
           label: "Blog",
           position: "left",
+        },
+        {
+          type: "docsVersionDropdown",
+          position: "right",
         },
         {
           href: "https://github.com/caas-team/GoKubeDownscaler",
