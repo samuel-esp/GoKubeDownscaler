@@ -5,7 +5,7 @@ import ProjectDescription from "@site/src/components/Homepage/ProjectDescription
 import KubeDownscalerFeatures from "@site/src/components/Homepage/KubeDownscalerFeatures";
 import HowItWorks from "@site/src/components/Homepage/HowItWorks";
 import FurtherCustomization from "@site/src/components/Homepage/FurtherCustomization";
-import { Button } from "../components/Basic/Button";
+import { Button, GitHubButton } from "../components/Basic/Button";
 import * as KubedownscalerSVG from "@site/static/img/kubedownscaler.svg";
 import Heading from "@theme/Heading";
 import Head from "@docusaurus/Head";
@@ -35,6 +35,7 @@ function HomepageHeader() {
           <div className="animate-fade-down flex justify-center gap-3 flex-col sm:flex-row">
             <Button name="Get Started" to="/guides/getting-started" className="w-52" />
             <Button name="Documentation" to="/docs" className="w-52" />
+            <GitHubButton className="hidden sm:block w-52" />
           </div>
         </div>
       </header>
