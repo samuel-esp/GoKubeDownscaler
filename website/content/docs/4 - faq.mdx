@@ -82,13 +82,13 @@ The source code is available on GitHub at
   <div className="faq-answer">
     The easiest way to install GoKubeDownscaler is via Helm:
 
-    ```
+    ```shell
     helm upgrade -i gokubedownscaler oci://ghcr.io/caas-team/charts/go-kube-downscaler
     ```
 
     You can also install it using raw Kubernetes manifests if you prefer.
 
-    See the installation guide for detailed instructions.
+    See the [installation guide](ref:guides-installation) for detailed instructions.
 
   </div>
 </div>
@@ -124,8 +124,10 @@ The source code is available on GitHub at
     Not necessarily.
     GoKubeDownscaler can be installed with cluster-wide
     permissions to manage workloads across all namespaces, or it can be
-    installed with limited permissions to manage specific namespaces or
-    workloads, giving you flexibility to limit scope where required.
+    installed with limited permissions to manage specific namespaces (even a single one),
+    giving you flexibility to limit scope where required.
+    See the [this section of the installation page](ref:guides-installation#constrained-installation-vs-cluster-wide-installation)
+    for more details.
   </div>
 </div>
 
@@ -140,7 +142,7 @@ The source code is available on GitHub at
     the correct local times even as DST changes occur.
     No manual actions
     are needed to account for changeovers between standard time and
-    daylight saving time.
+    daylight saving time or vice versa.
   </div>
 </div>
 
