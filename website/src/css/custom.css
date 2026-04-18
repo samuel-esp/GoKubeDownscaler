@@ -21,6 +21,29 @@
   --ifm-color-primary: #e20074;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  /* Narrow sidebar — more space for the main content */
+  --doc-sidebar-width: 240px;
+
+  /* Constrain the overall page width so the 3-column layout feels balanced */
+  --ifm-container-width-xl: 1320px;
+}
+
+/* Add breathing room only inside the doc/blog content — does not touch the navbar */
+.theme-doc-markdown,
+article.markdown {
+  padding-inline: 1.5rem;
+}
+
+/* Align the version banner label with the page title */
+.theme-doc-version-banner,
+.theme-doc-version-badge {
+  margin-inline-start: 1.5rem;
+}
+
+/* Align breadcrumbs with the version badge and page title */
+.theme-doc-breadcrumbs {
+  margin-inline-start: 1.5rem;
 }
 
 [data-theme="dark"] {

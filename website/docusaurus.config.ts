@@ -20,9 +20,9 @@ const config: Config = {
   tagline: "A Horizontal Autoscaler For Kubernetes Workloads",
   favicon: "img/kubedownscaler.svg",
 
-  url: "https://caas-team.github.io",
+  url: "https://kube-downscaler.io",
 
-  baseUrl: "/GoKubeDownscaler",
+  baseUrl: "/",
 
   organizationName: "caas-team",
   projectName: "GoKubeDownscaler",
@@ -139,6 +139,11 @@ const config: Config = {
           label: "Contributing",
         },
         {
+          to: "/adopters",
+          label: "Adopters",
+          position: "left",
+        },
+        {
           to: "blog",
           label: "Blog",
           position: "left",
@@ -229,7 +234,7 @@ const config: Config = {
       innerHTML: JSON.stringify({
         "@context": "https://schema.org/",
         "@type": "SoftwareApplication",
-        "@id": "https://caas-team.github.io/GoKubeDownscaler/#software",
+        "@id": "https://kube-downscaler.io/#software",
         name: "GoKubeDownscaler",
         alternateName: ["kube-downscaler", "go-kube-downscaler", "kubernetes downscaler"],
         description:
@@ -237,7 +242,7 @@ const config: Config = {
         applicationCategory: "DeveloperApplication",
         applicationSubCategory: "Kubernetes Addon",
         operatingSystem: "Linux",
-        url: "https://caas-team.github.io/GoKubeDownscaler/",
+        url: "https://kube-downscaler.io/",
         downloadUrl:
           "https://github.com/caas-team/GoKubeDownscaler/releases/latest",
         license: "https://opensource.org/licenses/Apache-2.0",
@@ -253,7 +258,7 @@ const config: Config = {
           "@type": "Organization",
           name: "CaaS Team",
           url: "https://github.com/caas-team",
-          logo: "https://caas-team.github.io/GoKubeDownscaler/img/kubedownscaler.svg",
+          logo: "https://kube-downscaler.io/img/kubedownscaler.svg",
         },
         maintainer: {
           "@type": "Organization",
@@ -273,9 +278,9 @@ const config: Config = {
       innerHTML: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "@id": "https://caas-team.github.io/GoKubeDownscaler/#website",
+        "@id": "https://kube-downscaler.io/#website",
         name: "GoKubeDownscaler",
-        url: "https://caas-team.github.io/GoKubeDownscaler/",
+        url: "https://kube-downscaler.io/",
         description:
           "GoKubeDownscaler: a Kubernetes horizontal autoscaler that reduces Kubernetes cloud costs by scaling workloads based on time schedules.",
         publisher: {
@@ -289,7 +294,7 @@ const config: Config = {
       tagName: "link",
       attributes: {
         rel: "manifest",
-        href: "/GoKubeDownscaler/manifest.json",
+        href: "/manifest.json",
       },
     },
   ],
