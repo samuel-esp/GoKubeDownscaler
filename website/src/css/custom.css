@@ -41,9 +41,20 @@ article.markdown {
   margin-inline-start: 1.5rem;
 }
 
+/* Extra space between version badge and page title */
+.theme-doc-version-badge {
+  margin-bottom: 0.25rem;
+}
+
 /* Align breadcrumbs with the version badge and page title */
 .theme-doc-breadcrumbs {
   margin-inline-start: 1.5rem;
+}
+
+/* Align mobile TOC ("On this page") with the other content */
+.theme-doc-toc-mobile {
+  margin-inline: 1.5rem !important;
+  width: auto !important;
 }
 
 [data-theme="dark"] {
