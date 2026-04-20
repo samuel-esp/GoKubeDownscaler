@@ -43,7 +43,7 @@ The source code is available on GitHub at
     By scaling Kubernetes workloads down to zero during periods of low usage
     (for example after office hours, on weekends, or during holidays), cluster
     nodes are freed up.
-    This reduces the total number of running VMs and lowers
+This reduces the total number of running VMs and lowers
     your cloud bill.
   </div>
 </div>
@@ -54,7 +54,7 @@ The source code is available on GitHub at
   <hr className="faq-sep" />
   <div className="faq-answer">
     Yes.
-    GoKubeDownscaler works with any standard Kubernetes cluster, including
+GoKubeDownscaler works with any standard Kubernetes cluster, including
     Amazon EKS, Google GKE, Azure AKS, and self-managed clusters.
   </div>
 </div>
@@ -65,14 +65,14 @@ The source code is available on GitHub at
   <hr className="faq-sep" />
   <div className="faq-answer">
     Yes.
-    GoKubeDownscaler works perfectly with both Karpenter and the Cluster
+GoKubeDownscaler works perfectly with both Karpenter and the Cluster
     Autoscaler.
-    GoKubeDownscaler reduces the number of pods during off-hours while
-    Karpenter/Cluster Autoscaler right-sizes (or removes) nodes based on current
-    demand.
-    Since Karpenter offers demand-driven node provisioning, combining it
-    with GoKubeDownscaler's scheduled scale-to-zero behavior can produce even
-    stronger cost savings.
+GoKubeDownscaler reduces the number of pods during off-hours
+    while Karpenter/Cluster Autoscaler right-sizes (or removes) nodes based on
+    current demand.
+Since Karpenter offers demand-driven node provisioning,
+    combining it with GoKubeDownscaler's scheduled scale-to-zero behavior can
+    produce even stronger cost savings.
   </div>
 </div>
 
@@ -99,7 +99,8 @@ The source code is available on GitHub at
   <hr className="faq-sep" />
   <div className="faq-answer">
     GoKubeDownscaler supports scaling many resource types.
-    See the [workload types page](/docs/workload-types) for the complete list.
+See the [workload
+    types page](/docs/workload-types) for the complete list.
   </div>
 </div>
 
@@ -110,8 +111,10 @@ The source code is available on GitHub at
   <div className="faq-answer">
     The Kubernetes Horizontal Pod Autoscaler (HPA) scales workloads dynamically
     based on metrics such as CPU or memory usage.
-    Kube-downscaler scales workloads based on time schedules (for example nightly or on weekends).
-    This makes kube-downscaler particularly well-suited for predictable off-hours
+Kube-downscaler scales
+    workloads based on time schedules (for example nightly or on weekends).
+This
+    makes kube-downscaler particularly well-suited for predictable off-hours
     cost savings.
   </div>
 </div>
@@ -122,11 +125,13 @@ The source code is available on GitHub at
   <hr className="faq-sep" />
   <div className="faq-answer">
     Not necessarily.
-    GoKubeDownscaler can be installed with cluster-wide
+GoKubeDownscaler can be installed with cluster-wide
     permissions to manage workloads across all namespaces, or it can be
-    installed with limited permissions to manage specific namespaces, even a single one,
-    giving you flexibility to limit scope where required.
-    See the [this section of the installation page](ref:guides-installation#constrained-installation-vs-cluster-wide-installation)
+    installed with limited permissions to manage specific namespaces, even a
+    single one, giving you flexibility to limit scope where required.
+See the
+    [this section of the installation
+    page](ref:guides-installation#constrained-installation-vs-cluster-wide-installation)
     for more details.
   </div>
 </div>
@@ -137,11 +142,12 @@ The source code is available on GitHub at
   <hr className="faq-sep" />
   <div className="faq-answer">
     Yes, GoKubeDownscaler automatically adjusts for daylight saving time.
-    It uses the IANA timezone database to ensure workloads are scaled at
-    the correct local times even as DST changes occur.
-    No manual actions
-    are needed to account for changeovers between standard time and
-    daylight saving time or vice versa.
+It
+    uses the IANA timezone database to ensure workloads are scaled at the
+    correct local times even as DST changes occur.
+No manual actions are needed
+    to account for changeovers between standard time and daylight saving time or
+    vice versa.
   </div>
 </div>
 
