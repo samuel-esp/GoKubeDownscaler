@@ -205,6 +205,7 @@ func (c *client) StartWorkloadCache(ctx context.Context, resourceTypes []string)
 	for _, informer := range workloadCache.informers {
 		informers = append(informers, informer)
 	}
+
 	informers = append(informers, namespaceInformer)
 
 	cancel, err := startAndWaitForInformers(ctx, informers...)
@@ -215,6 +216,7 @@ func (c *client) StartWorkloadCache(ctx context.Context, resourceTypes []string)
 	c.workloadCache = workloadCache
 	c.namespaceInformer = namespaceInformer
 	c.cancel = cancel
+
 	return nil
 }
 
@@ -225,6 +227,7 @@ func (c client) GetNamespaceAnnotations(namespace string, ctx context.Context) (
 		if err != nil {
 			return nil, fmt.Errorf("failed to get namespace from informer cache: %w", err)
 		}
+
 		if exists {
 			cachedNamespace, ok := object.(*unstructured.Unstructured)
 			if !ok {
@@ -232,11 +235,13 @@ func (c client) GetNamespaceAnnotations(namespace string, ctx context.Context) (
 			}
 
 			slog.Debug("read namespace annotations from informer cache", "namespace", namespace)
+
 			return cachedNamespace.GetAnnotations(), nil
 		}
 	}
 
 	slog.Debug("reading namespace annotations from Kubernetes API", "namespace", namespace)
+
 	ns, err := c.clientsets.Kubernetes.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get namespace: %w", err)
@@ -496,6 +501,7 @@ func (c client) CreateLease(leaseName string) (*resourcelock.LeaseLock, error) {
 func (c client) GetNamespacesAsSet() (map[string]struct{}, error) {
 	if c.namespaceInformer != nil && c.namespaceInformer.HasSynced() {
 		namespaceSet := make(map[string]struct{})
+
 		for _, object := range c.namespaceInformer.GetStore().List() {
 			cachedNamespace, ok := object.(*unstructured.Unstructured)
 			if !ok {
@@ -506,10 +512,12 @@ func (c client) GetNamespacesAsSet() (map[string]struct{}, error) {
 		}
 
 		slog.Debug("read namespaces from informer cache", "count", len(namespaceSet))
+
 		return namespaceSet, nil
 	}
 
 	slog.Debug("reading namespaces from Kubernetes API")
+
 	namespaceList, err := c.clientsets.Kubernetes.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list namespaces: %w", err)

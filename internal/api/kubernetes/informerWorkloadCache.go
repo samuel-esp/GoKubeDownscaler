@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -58,7 +59,7 @@ type informerWorkloadCache struct {
 
 func newNamespaceInformer(client dynamic.Interface) (cache.SharedIndexInformer, error) {
 	if client == nil {
-		return nil, fmt.Errorf("dynamic Kubernetes client is nil")
+		return nil, errors.New("dynamic Kubernetes client is nil")
 	}
 
 	resourceInterface := client.Resource(schema.GroupVersionResource{Version: "v1", Resource: "namespaces"}).Namespace(metav1.NamespaceAll)
@@ -88,7 +89,7 @@ func newNamespaceInformer(client dynamic.Interface) (cache.SharedIndexInformer, 
 
 func newInformerWorkloadCache(client dynamic.Interface, resourceTypes []string) (*informerWorkloadCache, error) {
 	if client == nil {
-		return nil, fmt.Errorf("dynamic Kubernetes client is nil")
+		return nil, errors.New("dynamic Kubernetes client is nil")
 	}
 
 	c := &informerWorkloadCache{
@@ -98,6 +99,7 @@ func newInformerWorkloadCache(client dynamic.Interface, resourceTypes []string) 
 
 	for _, resourceType := range resourceTypes {
 		resourceType = strings.ToLower(resourceType)
+
 		resource, ok := informerResources[resourceType]
 		if !ok {
 			return nil, fmt.Errorf("no informer mapping for resource %q", resourceType)
@@ -116,6 +118,7 @@ func newInformerWorkloadCache(client dynamic.Interface, resourceTypes []string) 
 				return resourceInterface.Watch(ctx, options)
 			},
 		}
+
 		informer := cache.NewSharedIndexInformer(
 			listWatch,
 			&unstructured.Unstructured{},
@@ -155,6 +158,7 @@ func logInformerEvent(event, resource string, object any, deletion bool) {
 	if deletion {
 		key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(object)
 	}
+
 	if err != nil {
 		slog.Debug("Kubernetes informer event", "event", event, "resource", resource, "error", err)
 		return
@@ -167,24 +171,29 @@ func startAndWaitForInformers(ctx context.Context, informers ...cache.SharedInde
 	runCtx, cancel := context.WithCancel(ctx)
 
 	slog.Debug("starting Kubernetes informers", "count", len(informers))
+
 	for index, informer := range informers {
 		slog.Debug("starting Kubernetes informer", "index", index)
+
 		go informer.Run(runCtx.Done())
 	}
 
 	deadline := time.NewTimer(15 * time.Second)
 	defer deadline.Stop()
+
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 
 	for {
 		allSynced := true
+
 		for _, informer := range informers {
 			if !informer.HasSynced() {
 				allSynced = false
 				break
 			}
 		}
+
 		if allSynced {
 			slog.Debug("Kubernetes informers synchronized", "count", len(informers))
 			return cancel, nil
@@ -194,10 +203,12 @@ func startAndWaitForInformers(ctx context.Context, informers ...cache.SharedInde
 		case <-deadline.C:
 			cancel()
 			slog.Error("Kubernetes informers failed to synchronize", "count", len(informers), "timeout", "15s")
-			return nil, fmt.Errorf("informer caches failed to sync within 15 seconds")
+
+			return nil, errors.New("informer caches failed to sync within 15 seconds")
 		case <-ctx.Done():
 			cancel()
 			slog.Debug("Kubernetes informer startup canceled", "count", len(informers), "error", ctx.Err())
+
 			return nil, ctx.Err()
 		case <-ticker.C:
 		}
@@ -209,8 +220,10 @@ func (c *informerWorkloadCache) GetWorkloads(namespaces, resourceTypes []string)
 	for _, namespace := range namespaces {
 		namespaceSet[namespace] = struct{}{}
 	}
+
 	allNamespaces := namespaces == nil
 	workloads := make([]scalable.Workload, 0)
+
 	slog.Debug("reading workloads from informer cache", "resources", resourceTypes, "namespaces", namespaces)
 
 	c.mu.RLock()
@@ -218,6 +231,7 @@ func (c *informerWorkloadCache) GetWorkloads(namespaces, resourceTypes []string)
 
 	for _, resourceType := range resourceTypes {
 		resourceType = strings.ToLower(resourceType)
+
 		informer, ok := c.informers[resourceType]
 		if !ok {
 			return nil, fmt.Errorf("resource %q is not cached", resourceType)
@@ -225,6 +239,7 @@ func (c *informerWorkloadCache) GetWorkloads(namespaces, resourceTypes []string)
 
 		resource := c.resources[resourceType]
 		resourceCount := 0
+
 		for _, obj := range informer.GetStore().List() {
 			cachedObject, ok := obj.(*unstructured.Unstructured)
 			if !ok {
@@ -239,6 +254,7 @@ func (c *informerWorkloadCache) GetWorkloads(namespaces, resourceTypes []string)
 
 			if resourceType == "awselbservices" || resourceType == "awsnlbservices" {
 				value := strings.ToLower(cachedObject.GetAnnotations()[scalable.AWSLoadBalancerAnnotation])
+
 				isNLB := value == "nlb"
 				if (resourceType == "awsnlbservices") != isNLB {
 					continue
@@ -268,6 +284,7 @@ func (c *informerWorkloadCache) GetWorkloads(namespaces, resourceTypes []string)
 	}
 
 	slog.Debug("finished reading workloads from informer cache", "count", len(workloads))
+
 	return workloads, nil
 }
 
@@ -279,6 +296,7 @@ func setCachedType(obj *unstructured.Unstructured, gvr schema.GroupVersionResour
 	if obj.GetAPIVersion() == "" {
 		obj.SetAPIVersion(gvr.GroupVersion().String())
 	}
+
 	if obj.GetKind() == "" {
 		return fmt.Errorf("cached %s has no kind", resource)
 	}
