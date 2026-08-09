@@ -139,6 +139,8 @@ Create defined permissions for the webhook clusterrole
     - namespaces
   verbs:
     - get
+    - list
+    - watch
 - apiGroups:
     - admissionregistration.k8s.io
   resources:
@@ -185,6 +187,8 @@ Create defined permissions for roles
     - namespaces
   verbs:
     - get
+    - list
+    - watch
 - apiGroups:
     - ""
   resources:
@@ -202,6 +206,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "statefulsets" }}
@@ -212,6 +217,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "daemonsets" }}
@@ -222,6 +228,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "rollouts" }}
@@ -232,6 +239,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "horizontalpodautoscalers" }}
@@ -242,6 +250,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "jobs" }}
@@ -252,6 +261,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "cronjobs" }}
@@ -265,6 +275,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "scaledobjects" }}
@@ -275,6 +286,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "stacks" }}
@@ -285,6 +297,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "prometheuses" }}
@@ -295,6 +308,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "poddisruptionbudgets" }}
@@ -305,6 +319,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "autoscalingrunnersets" }}
@@ -315,6 +330,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if or (eq $resource "services") (eq $resource "awselbservices") (eq $resource "awsnlbservices")}}
@@ -325,6 +341,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "ingresses"}}
@@ -335,6 +352,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "gateways"}}
@@ -345,6 +363,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "postgresqls" }}
@@ -355,6 +374,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "kafkaconnects" }}
@@ -365,6 +385,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "kafkamirrormaker2s" }}
@@ -375,6 +396,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- if eq $resource "kafkabridges" }}
@@ -385,6 +407,7 @@ Create defined permissions for roles
   verbs:
     - get
     - list
+    - watch
     - update
 {{- end }}
 {{- end }}

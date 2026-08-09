@@ -23,8 +23,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	gatewayapi "sigs.k8s.io/gateway-api/pkg/client/clientset/versioned"
@@ -52,6 +55,8 @@ type Client interface {
 	GetNamespaceScope(namespace string, ctx context.Context) (*values.Scope, error)
 	// GetWorkloads gets all workloads of the specified resources for the specified namespaces
 	GetWorkloads(namespaces []string, resourceTypes []string, ctx context.Context) ([]scalable.Workload, error)
+	// StartWorkloadCache starts informer-backed workload caches for the configured resources.
+	StartWorkloadCache(ctx context.Context, resourceTypes []string) error
 	// RegetWorkload gets the workload again to ensure the latest state
 	RegetWorkload(workload scalable.Workload, ctx context.Context) error
 	// DownscaleWorkload downscales the workload to the specified replicas
@@ -75,7 +80,7 @@ type Client interface {
 // NewClient makes a new Client.
 //
 // nolint: cyclop // this function is complex due to the multiple clientsets being created.
-func NewClient(kubeconfig string, dryRun bool, qps float64, burst int) (client, error) {
+func NewClient(kubeconfig string, dryRun bool, qps float64, burst int) (Client, error) {
 	var kubeclient client
 
 	var clientsets scalable.Clientsets
@@ -85,15 +90,15 @@ func NewClient(kubeconfig string, dryRun bool, qps float64, burst int) (client, 
 
 	config, err := getConfig(kubeconfig)
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to get config for Kubernetes: %w", err)
+		return &kubeclient, fmt.Errorf("failed to get config for Kubernetes: %w", err)
 	}
 
 	if burst <= 0 {
-		return kubeclient, fmt.Errorf("%w: got %d", ErrInvalidBurst, burst)
+		return &kubeclient, fmt.Errorf("%w: got %d", ErrInvalidBurst, burst)
 	}
 
 	if qps == 0 {
-		return kubeclient, fmt.Errorf("%w", ErrInvalidQPS)
+		return &kubeclient, fmt.Errorf("%w", ErrInvalidQPS)
 	}
 
 	// set qps and burst rate limiting options. See https://kubernetes.io/docs/reference/config-api/apiserver-eventratelimit.v1alpha1/
@@ -102,49 +107,55 @@ func NewClient(kubeconfig string, dryRun bool, qps float64, burst int) (client, 
 
 	clientsets.Kubernetes, err = kubernetes.NewForConfig(config)
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to get clientset for Kubernetes resources: %w", err)
+		return &kubeclient, fmt.Errorf("failed to get clientset for Kubernetes resources: %w", err)
+	}
+
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return &kubeclient, fmt.Errorf("failed to get dynamic Kubernetes client: %w", err)
 	}
 
 	clientsets.Keda, err = keda.NewForConfig(config)
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to get clientset for keda resources: %w", err)
+		return &kubeclient, fmt.Errorf("failed to get clientset for keda resources: %w", err)
 	}
 
 	clientsets.Argo, err = argo.NewForConfig(config)
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to get clientset for argo resources: %w", err)
+		return &kubeclient, fmt.Errorf("failed to get clientset for argo resources: %w", err)
 	}
 
 	clientsets.Zalando, err = zalando.NewForConfig(config)
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to get clientset for zalando resources: %w", err)
+		return &kubeclient, fmt.Errorf("failed to get clientset for zalando resources: %w", err)
 	}
 
 	clientsets.Monitoring, err = monitoring.NewForConfig(config)
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to get clientset for monitoring resources: %w", err)
+		return &kubeclient, fmt.Errorf("failed to get clientset for monitoring resources: %w", err)
 	}
 
 	clientsets.Gateway, err = gatewayapi.NewForConfig(config)
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to get clientset for gateway resources: %w", err)
+		return &kubeclient, fmt.Errorf("failed to get clientset for gateway resources: %w", err)
 	}
 
 	scheme, err = NewScheme()
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to build scheme: %w", err)
+		return &kubeclient, fmt.Errorf("failed to build scheme: %w", err)
 	}
 
 	clientsets.Client, err = ctrlclient.New(config, ctrlclient.Options{
 		Scheme: scheme,
 	})
 	if err != nil {
-		return kubeclient, fmt.Errorf("failed to get controller runtime client: %w", err)
+		return &kubeclient, fmt.Errorf("failed to get controller runtime client: %w", err)
 	}
 
 	kubeclient.clientsets = &clientsets
+	kubeclient.dynamicClient = dynamicClient
 
-	return kubeclient, nil
+	return &kubeclient, nil
 }
 
 // NewScheme creates a new runtime.Scheme with all needed APIs registered.
@@ -168,12 +179,64 @@ func NewScheme() (*runtime.Scheme, error) {
 
 // client is a Kubernetes client with downscaling specific functions.
 type client struct {
-	clientsets *scalable.Clientsets
-	dryRun     bool
+	clientsets        *scalable.Clientsets
+	dryRun            bool
+	dynamicClient     dynamic.Interface
+	workloadCache     *informerWorkloadCache
+	namespaceInformer cache.SharedIndexInformer
+	cancel            context.CancelFunc
+}
+
+// StartWorkloadCache starts informer-backed caches for the configured resources.
+// The polling loop remains responsible for deciding when to scale; informers only
+// replace the repeated list requests used to build each scan snapshot.
+func (c *client) StartWorkloadCache(ctx context.Context, resourceTypes []string) error {
+	workloadCache, err := newInformerWorkloadCache(c.dynamicClient, resourceTypes)
+	if err != nil {
+		return err
+	}
+
+	namespaceInformer, err := newNamespaceInformer(c.dynamicClient)
+	if err != nil {
+		return err
+	}
+
+	informers := make([]cache.SharedIndexInformer, 0, len(workloadCache.informers)+1)
+	for _, informer := range workloadCache.informers {
+		informers = append(informers, informer)
+	}
+	informers = append(informers, namespaceInformer)
+
+	cancel, err := startAndWaitForInformers(ctx, informers...)
+	if err != nil {
+		return err
+	}
+
+	c.workloadCache = workloadCache
+	c.namespaceInformer = namespaceInformer
+	c.cancel = cancel
+	return nil
 }
 
 // getNamespaceAnnotations gets the annotations of the workload's namespace.
 func (c client) GetNamespaceAnnotations(namespace string, ctx context.Context) (map[string]string, error) {
+	if c.namespaceInformer != nil && c.namespaceInformer.HasSynced() {
+		object, exists, err := c.namespaceInformer.GetStore().GetByKey(namespace)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get namespace from informer cache: %w", err)
+		}
+		if exists {
+			cachedNamespace, ok := object.(*unstructured.Unstructured)
+			if !ok {
+				return nil, fmt.Errorf("cached namespace has unexpected type %T", object)
+			}
+
+			slog.Debug("read namespace annotations from informer cache", "namespace", namespace)
+			return cachedNamespace.GetAnnotations(), nil
+		}
+	}
+
+	slog.Debug("reading namespace annotations from Kubernetes API", "namespace", namespace)
 	ns, err := c.clientsets.Kubernetes.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get namespace: %w", err)
@@ -188,6 +251,15 @@ func (c client) GetWorkloads(
 	resourceTypes []string,
 	ctx context.Context,
 ) ([]scalable.Workload, error) {
+	if c.workloadCache != nil {
+		workloads, err := c.workloadCache.GetWorkloads(namespaces, resourceTypes)
+		if err == nil {
+			return workloads, nil
+		}
+
+		slog.Warn("failed to read workloads from informer cache, falling back to API listing", "error", err)
+	}
+
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -422,6 +494,22 @@ func (c client) CreateLease(leaseName string) (*resourcelock.LeaseLock, error) {
 
 // GetNamespacesAsSet returns all namespaces as a set (map[string]struct{}).
 func (c client) GetNamespacesAsSet() (map[string]struct{}, error) {
+	if c.namespaceInformer != nil && c.namespaceInformer.HasSynced() {
+		namespaceSet := make(map[string]struct{})
+		for _, object := range c.namespaceInformer.GetStore().List() {
+			cachedNamespace, ok := object.(*unstructured.Unstructured)
+			if !ok {
+				return nil, fmt.Errorf("cached namespace has unexpected type %T", object)
+			}
+
+			namespaceSet[cachedNamespace.GetName()] = struct{}{}
+		}
+
+		slog.Debug("read namespaces from informer cache", "count", len(namespaceSet))
+		return namespaceSet, nil
+	}
+
+	slog.Debug("reading namespaces from Kubernetes API")
 	namespaceList, err := c.clientsets.Kubernetes.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list namespaces: %w", err)
@@ -494,7 +582,7 @@ func (c client) GetNamespacesScopes(workloads []scalable.Workload, ctx context.C
 }
 
 func (c client) GetNamespaceScope(namespace string, ctx context.Context) (*values.Scope, error) {
-	nsLogger := NewResourceLoggerForNamespace(c, namespace)
+	nsLogger := NewResourceLoggerForNamespace(&c, namespace)
 
 	slog.Debug("fetching namespace annotations", "namespace", namespace)
 

@@ -43,6 +43,10 @@ func main() {
 
 	defer cancel()
 
+	if err := client.StartWorkloadCache(ctx, config.IncludeResources); err != nil {
+		slog.Warn("failed to start workload informer cache, using API listings", "error", err)
+	}
+
 	go serveHealth()
 
 	downscalerMetrics := initMetrics(config)
