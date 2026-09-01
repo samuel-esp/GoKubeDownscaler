@@ -155,14 +155,30 @@ webhookController:
 
   priorityClassName: ""
 
-  extraArguments:
-  #  - --interval=60
+  serviceAccount:
+    create: true
+    annotations: {}
+    # The name of the service account to use for the webhook controller.
+    # If not set and create is true, a name is generated using the webhook fullname template.
+    name: ""
+
+  extraArguments: []
+
+  imagePullSecrets: []
 
   podAnnotations: {}
 
   podLabels: {}
 
   extraEnv: []
+
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    privileged: false
+    capabilities:
+      drop:
+        - ALL
 
   healthProbes:
     readinessProbe:
