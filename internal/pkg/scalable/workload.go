@@ -117,8 +117,8 @@ type PercentageWorkload interface {
 type ScalingSummary struct {
 	SavedResources *metrics.SavedResources
 	IsUpdateNeeded bool
-	FromReplicas   values.Replicas
-	ToReplicas     values.Replicas
+	From           values.Replicas
+	To             values.Replicas
 	Attribute      string
 }
 

@@ -87,8 +87,8 @@ func (d *daemonSet) ScaleUp() (ScalingSummary, error) {
 
 	return ScalingSummary{
 		IsUpdateNeeded: true,
-		FromReplicas:   fromReplicas,
-		ToReplicas:     values.StringReplicas("not present"),
+		From:           fromReplicas,
+		To:             values.StringReplicas("not present"),
 	}, nil
 }
 
@@ -97,8 +97,8 @@ func (d *daemonSet) ScaleDown(_ values.Replicas) (ScalingSummary, error) {
 	_, hasLabel := d.Spec.Template.Spec.NodeSelector[labelMatchNone]
 	summary := ScalingSummary{
 		SavedResources: metrics.NewSavedResources(0, 0),
-		FromReplicas:   values.StringReplicas("present"),
-		ToReplicas:     values.StringReplicas("not present"),
+		From:           values.StringReplicas("present"),
+		To:             values.StringReplicas("not present"),
 	}
 
 	if hasLabel {
