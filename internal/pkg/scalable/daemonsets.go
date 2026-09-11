@@ -69,7 +69,11 @@ func (d *daemonSet) ScaleUp() (ScalingSummary, error) {
 	if err != nil {
 		var originalReplicasUnsetErr *OriginalReplicasUnsetError
 		if errors.As(err, &originalReplicasUnsetErr) {
-			slog.Debug("original replicas is not set, skipping", "workload", d.GetName(), "namespace", d.GetNamespace())
+			slog.Debug(
+				"original replicas is not set, skipping", "kind", d.GroupVersionKind().Kind,
+				"workload", d.GetName(), "namespace", d.GetNamespace(),
+			)
+
 			return summary, nil
 		}
 
@@ -110,12 +114,18 @@ func (d *daemonSet) ScaleDown(_ values.Replicas) (ScalingSummary, error) {
 				return summary, fmt.Errorf("failed to get original replicas for workload: %w", err)
 			}
 
-			slog.Debug("workload is already at target scale down state, skipping", "workload", d.GetName(), "namespace", d.GetNamespace())
+			slog.Debug(
+				"workload is already at target scale down state, skipping", "kind", d.GroupVersionKind().Kind,
+				"workload", d.GetName(), "namespace", d.GetNamespace(),
+			)
 
 			return summary, nil
 		}
 
-		slog.Debug("workload is already scaled down, skipping", "workload", d.GetName(), "namespace", d.GetNamespace())
+		slog.Debug(
+			"workload is already scaled down, skipping", "kind", d.GroupVersionKind().Kind,
+			"workload", d.GetName(), "namespace", d.GetNamespace(),
+		)
 
 		summary.SavedResources = d.getResourcesRequests(d.Status.DesiredNumberScheduled)
 
