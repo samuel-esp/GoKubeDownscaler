@@ -51,9 +51,9 @@ func TestDaemonSet_ScaleUp(t *testing.T) {
 				setOriginalReplicas(test.originalReplicas, &deamonset)
 			}
 
-			updateNeeded, err := deamonset.ScaleUp()
+			summary, err := deamonset.ScaleUp()
 			require.NoError(t, err)
-			assert.Equal(t, test.wantUpdateNeeded, updateNeeded)
+			assert.Equal(t, test.wantUpdateNeeded, summary.IsUpdateNeeded)
 
 			_, ok := deamonset.Spec.Template.Spec.NodeSelector[labelMatchNone]
 			assert.Equal(t, test.wantLabelSet, ok)
@@ -159,15 +159,15 @@ func TestDaemonSet_ScaleDown(t *testing.T) {
 				setOriginalReplicas(test.originalReplicas, &daemonset)
 			}
 
-			savedResources, updateNeeded, err := daemonset.ScaleDown(values.AbsoluteReplicas(0))
+			summary, err := daemonset.ScaleDown(values.AbsoluteReplicas(0))
 			require.NoError(t, err)
-			assert.Equal(t, test.wantUpdateNeeded, updateNeeded)
+			assert.Equal(t, test.wantUpdateNeeded, summary.IsUpdateNeeded)
 
 			_, ok := daemonset.Spec.Template.Spec.NodeSelector[labelMatchNone]
 			assert.Equal(t, test.wantLabelSet, ok)
 
-			assert.InDelta(t, test.wantSavedCPU, savedResources.TotalCPU(), 0.0001)
-			assert.InDelta(t, test.wantSavedMemory, savedResources.TotalMemory(), 1e5)
+			assert.InDelta(t, test.wantSavedCPU, summary.SavedResources.TotalCPU(), 0.0001)
+			assert.InDelta(t, test.wantSavedMemory, summary.SavedResources.TotalMemory(), 1e5)
 		})
 	}
 }

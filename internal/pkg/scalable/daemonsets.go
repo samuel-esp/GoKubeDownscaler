@@ -51,45 +51,75 @@ type daemonSet struct {
 	*appsv1.DaemonSet
 }
 
+// LogUpscaleSuccessful logs DaemonSet activation.
+func (d *daemonSet) LogUpscaleSuccessful(summary ScalingSummary, dryRun bool) {
+	logWorkloadScalingMessage("unsuspended", "downscaler/match-none nodeSelector", d, summary, dryRun)
+}
+
+// LogDownscaleSuccessful logs DaemonSet deactivation.
+func (d *daemonSet) LogDownscaleSuccessful(summary ScalingSummary, dryRun bool) {
+	logWorkloadScalingMessage("suspended", "downscaler/match-none nodeSelector", d, summary, dryRun)
+}
+
 // ScaleUp scales the resource up.
-func (d *daemonSet) ScaleUp() (bool, error) {
+func (d *daemonSet) ScaleUp() (ScalingSummary, error) {
+	var summary ScalingSummary
+
 	_, err := getOriginalReplicas(d)
 	if err != nil {
 		var originalReplicasUnsetErr *OriginalReplicasUnsetError
 		if errors.As(err, &originalReplicasUnsetErr) {
 			slog.Debug("original replicas is not set, skipping", "workload", d.GetName(), "namespace", d.GetNamespace())
-			return false, nil
+			return summary, nil
 		}
 
-		return false, fmt.Errorf("failed to get original replicas for workload: %w", err)
+		return summary, fmt.Errorf("failed to get original replicas for workload: %w", err)
 	}
 
 	delete(d.Spec.Template.Spec.NodeSelector, labelMatchNone)
 
 	removeOriginalReplicas(d)
 
-	return true, nil
+	fromReplicas := values.StringReplicas("not present")
+	if _, exists := d.Spec.Template.Spec.NodeSelector[labelMatchNone]; exists {
+		fromReplicas = values.StringReplicas("present")
+	}
+
+	return ScalingSummary{
+		IsUpdateNeeded: true,
+		FromReplicas:   fromReplicas,
+		ToReplicas:     values.StringReplicas("not present"),
+	}, nil
 }
 
 // ScaleDown scales the resource down.
-func (d *daemonSet) ScaleDown(_ values.Replicas) (*metrics.SavedResources, bool, error) {
-	if _, hasLabel := d.Spec.Template.Spec.NodeSelector[labelMatchNone]; hasLabel {
+func (d *daemonSet) ScaleDown(_ values.Replicas) (ScalingSummary, error) {
+	_, hasLabel := d.Spec.Template.Spec.NodeSelector[labelMatchNone]
+	summary := ScalingSummary{
+		SavedResources: metrics.NewSavedResources(0, 0),
+		FromReplicas:   values.StringReplicas("present"),
+		ToReplicas:     values.StringReplicas("not present"),
+	}
+
+	if hasLabel {
 		_, err := getOriginalReplicas(d)
 
 		var originalReplicasUnsetErr *OriginalReplicasUnsetError
 		if err != nil {
 			if !errors.As(err, &originalReplicasUnsetErr) {
-				return metrics.NewSavedResources(0, 0), false, fmt.Errorf("failed to get original replicas for workload: %w", err)
+				return summary, fmt.Errorf("failed to get original replicas for workload: %w", err)
 			}
 
 			slog.Debug("workload is already at target scale down state, skipping", "workload", d.GetName(), "namespace", d.GetNamespace())
 
-			return metrics.NewSavedResources(0, 0), false, nil
+			return summary, nil
 		}
 
 		slog.Debug("workload is already scaled down, skipping", "workload", d.GetName(), "namespace", d.GetNamespace())
 
-		return d.getResourcesRequests(d.Status.DesiredNumberScheduled), false, nil
+		summary.SavedResources = d.getResourcesRequests(d.Status.DesiredNumberScheduled)
+
+		return summary, nil
 	}
 
 	if d.Spec.Template.Spec.NodeSelector == nil {
@@ -102,7 +132,10 @@ func (d *daemonSet) ScaleDown(_ values.Replicas) (*metrics.SavedResources, bool,
 
 	setOriginalReplicas(values.BooleanReplicas(false), d)
 
-	return savedResources, true, nil
+	summary.SavedResources = savedResources
+	summary.IsUpdateNeeded = true
+
+	return summary, nil
 }
 
 // Reget regets the resource from the Kubernetes API.
