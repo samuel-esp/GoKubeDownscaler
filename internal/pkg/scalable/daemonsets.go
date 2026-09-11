@@ -52,12 +52,12 @@ type daemonSet struct {
 }
 
 // LogUpscaleSuccessful logs DaemonSet activation.
-func (d *daemonSet) LogUpscaleSuccessful(summary ScalingSummary, dryRun bool) {
+func (d *daemonSet) LogUpscaleSuccessful(summary *ScalingSummary, dryRun bool) {
 	logWorkloadScalingMessage("unsuspended", "downscaler/match-none nodeSelector", d, summary, dryRun)
 }
 
 // LogDownscaleSuccessful logs DaemonSet deactivation.
-func (d *daemonSet) LogDownscaleSuccessful(summary ScalingSummary, dryRun bool) {
+func (d *daemonSet) LogDownscaleSuccessful(summary *ScalingSummary, dryRun bool) {
 	logWorkloadScalingMessage("suspended", "downscaler/match-none nodeSelector", d, summary, dryRun)
 }
 
