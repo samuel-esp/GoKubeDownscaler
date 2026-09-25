@@ -89,7 +89,7 @@ const SupportedResourceGroupList: SupportedResourceGroupProps[] = [
     SvgLight: OpenKruiseSVG.default,
     SvgDark: OpenKruiseSVG.default,
     href: "https://openkruise.io/",
-    supportedResources: ["StatefulSet, CloneSet, AdvancedCronJob, BroadcastJob, DaemonSet"],
+    supportedResources: ["StatefulSet", "CloneSet", "AdvancedCronJob", "BroadcastJob", "DaemonSet"],
   },
 ];
 
